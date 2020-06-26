@@ -1,2 +1,3 @@
-# sockets
-A repository that stores various C excercises on network sockets
+# Sockets 🔌
+> A repository that stores various C excercises on network sockets
+
