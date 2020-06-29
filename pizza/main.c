@@ -10,7 +10,7 @@
 #define MAX_NUMBER_OF_ORDERS 2048
 #define MAX_NUMBER_OF_PIZZA 16
 
-int order_number = 0;
+int global_order_number = 0;
 
 struct order {
     int id;
@@ -37,10 +37,10 @@ int make_socket(int port, struct sockaddr_in *sockaddr) {
     return sock;
 }
 
-int order(char *pizzas[], char address[], char hours[]) {
+int add_order(char *pizzas[], char address[], char hours[]) {
     struct order current_order;
 
-    current_order.id = ++order_number;
+    current_order.id = global_order_number++;
     strcpy(current_order.address, address);
     strcpy(current_order.hours, hours);
 
@@ -51,13 +51,18 @@ int order(char *pizzas[], char address[], char hours[]) {
         }
     }
 
-    orders[order_number] = current_order;
+    orders[global_order_number] = current_order;
 
-    return order_number;
+    return global_order_number;
 }
 
-void cancel_order(int number) {
+void cancel_order(int order_number) {
+    int number_of_orders = sizeof(orders) / sizeof(struct order);
 
+    number_of_orders--;
+    for (int i = order_number; i < number_of_orders; i++) {
+        orders[i] = orders[i + 1];
+    }
 }
 
 char **parse(char buffer[], int number_of_string, const char * delimiter) {
@@ -84,7 +89,7 @@ void handle_order(int connfd, char * request) {
     bzero(buffer, BUFFER_SIZE);
     strcpy(buffer, "\nWe are placing your order...\n");
     send(connfd, buffer, sizeof(buffer), 0);
-    int order_n = order(pizzas, order_args[2], order_args[3]);
+    int order_n = add_order(pizzas, order_args[2], order_args[3]);
 
     struct order current_order = orders[order_n];
 
@@ -104,15 +109,19 @@ void handle_order(int connfd, char * request) {
 void handle_cancel(int connfd, char * request) {
     char buffer[BUFFER_SIZE];
     char * rest;
-    int order_n = (int) strtol(request, &rest, 10);
+    char ** cancel_args = parse(request, 2, " ");
+    int order_number = (int) strtol(cancel_args[1], &rest, 10);
 
-    if (order_n > MAX_NUMBER_OF_ORDERS) {
+    if (order_number > MAX_NUMBER_OF_ORDERS) {
         perror("Your order number is wrong");
         exit(EXIT_FAILURE);
     }
 
-    cancel_order(order_n);
-    printf("Received order cancellation for order with number: %i", order_n);
+    cancel_order(order_number);
+    
+    bzero(buffer, BUFFER_SIZE);
+    snprintf(buffer, BUFFER_SIZE, "\nReceived order cancellation for order with number: %i\n", order_number);
+    send(connfd, buffer, sizeof(buffer), 0);
 }
 
 void handle_request(int connfd) {
