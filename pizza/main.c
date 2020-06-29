@@ -40,7 +40,7 @@ int make_socket(int port, struct sockaddr_in *sockaddr) {
 int add_order(char *pizzas[], char address[], char hours[]) {
     struct order current_order;
 
-    current_order.id = global_order_number++;
+    current_order.id = global_order_number;
     strcpy(current_order.address, address);
     strcpy(current_order.hours, hours);
 
@@ -53,7 +53,7 @@ int add_order(char *pizzas[], char address[], char hours[]) {
 
     orders[global_order_number] = current_order;
 
-    return global_order_number;
+    return global_order_number++;
 }
 
 void cancel_order(int order_number) {
@@ -65,10 +65,10 @@ void cancel_order(int order_number) {
     }
 }
 
-char **parse(char buffer[], int number_of_string, const char * delimiter) {
+char **parse(char buffer[], int number_of_string, const char *delimiter) {
     int i = 0;
     char *token = strtok(buffer, delimiter);
-    char ** arr = calloc(number_of_string, sizeof(char *));
+    char **arr = calloc(number_of_string, sizeof(char *));
 
     while (token != NULL) {
         token[strcspn(token, "\n")] = 0; // Remove trailing new lines
@@ -81,20 +81,22 @@ char **parse(char buffer[], int number_of_string, const char * delimiter) {
     return arr;
 }
 
-void handle_order(int connfd, char * request) {
+void handle_order(int connfd, char *request) {
     char buffer[BUFFER_SIZE];
-    char ** order_args = parse(request, 4, " ");
-    char ** pizzas = parse(order_args[1], 16, ",");
+    char **order_args = parse(request, 4, " ");
+    char **pizzas = parse(order_args[1], 16, ",");
 
     bzero(buffer, BUFFER_SIZE);
     strcpy(buffer, "\nWe are placing your order...\n");
     send(connfd, buffer, sizeof(buffer), 0);
-    int order_n = add_order(pizzas, order_args[2], order_args[3]);
+    int order_number = add_order(pizzas, order_args[2], order_args[3]);
 
-    struct order current_order = orders[order_n];
+    struct order current_order = orders[order_number];
 
     bzero(buffer, BUFFER_SIZE);
-    snprintf(buffer, BUFFER_SIZE, "\nYour order was placed!\nOrder number: %i\nAddress: %s\nDelivery hours: %s\nPizzas:\n", current_order.id, current_order.address, current_order.hours);
+    snprintf(buffer, BUFFER_SIZE,
+             "\nYour order was placed!\nOrder number: %i\nAddress: %s\nDelivery hours: %s\nPizzas:\n", current_order.id,
+             current_order.address, current_order.hours);
     send(connfd, buffer, sizeof(buffer), 0);
 
     for (int i = 0; i < MAX_NUMBER_OF_PIZZA; ++i) {
@@ -106,10 +108,10 @@ void handle_order(int connfd, char * request) {
     }
 }
 
-void handle_cancel(int connfd, char * request) {
+void handle_cancel(int connfd, char *request) {
     char buffer[BUFFER_SIZE];
-    char * rest;
-    char ** cancel_args = parse(request, 2, " ");
+    char *rest;
+    char **cancel_args = parse(request, 2, " ");
     int order_number = (int) strtol(cancel_args[1], &rest, 10);
 
     if (order_number > MAX_NUMBER_OF_ORDERS) {
@@ -118,9 +120,9 @@ void handle_cancel(int connfd, char * request) {
     }
 
     cancel_order(order_number);
-    
+
     bzero(buffer, BUFFER_SIZE);
-    snprintf(buffer, BUFFER_SIZE, "\nReceived order cancellation for order with number: %i\n", order_number);
+    snprintf(buffer, BUFFER_SIZE, "\nOrder with number: %i correctly cancelled", order_number);
     send(connfd, buffer, sizeof(buffer), 0);
 }
 
