@@ -7,8 +7,9 @@ They are probably simple and trivial programs but, you know, it's worth sharing!
 ## Exercises and examples
 
 - hello-world-udp: An UDP client that sends a simple "Hello World" datagram to a fixed address UDP Server.
-- tcp-server: A basic iterative TCP server
-- pizza: A TCP pizza 🍕 delivery service
+- tcp-server: A basic iterative TCP server.
+- tcp-server-fork: A TCP server that spawns a child process for each incoming connection.
+- pizza: A TCP pizza 🍕 delivery service.
 - utils: A fast up-and-running Node.JS UDP server that listens on 127.0.0.1.41234 and send back a message.
 
 ### References
