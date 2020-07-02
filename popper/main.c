@@ -1,14 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <strings.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
 
 #define SERVER_PORT 8080
 
-void send_command(int sock, char *command, char *args, char *response) {
+void send_command(int sock, char *command, char *args) {
     char buffer[256] = {0};
 
     snprintf(buffer, sizeof(buffer), "%s %s", command, args);
@@ -16,15 +15,33 @@ void send_command(int sock, char *command, char *args, char *response) {
     if (send(sock, buffer, sizeof(buffer), 0) == -1) {
         perror("Error during send message");
     }
+}
 
-    if (recv(sock, response, sizeof(response), 0) == -1) {
-        perror("Error during receive message");
+int receive_data(int socket_fd, char *buffer) {
+    ssize_t data_read,
+    total = 0;
+
+    while ((data_read = recv(socket_fd, buffer, 1024, 0)) > 0) {
+        if (data_read == 0 || buffer[data_read - 1] == '\n') {
+            break;
+        }
+
+        if (data_read == -1) {
+            perror("Error while receiving message");
+            break;
+        }
+
+        total += data_read;
     }
+
+    buffer[data_read] = '\0';
+
+    return data_read;
 }
 
 int main(int argc, char *argv[]) {
     char input[128] = {0};
-    char response[2048] = {0};
+    char response[1024] = {0};
     int sock;
     struct sockaddr_in sockaddr;
 
@@ -51,27 +68,33 @@ int main(int argc, char *argv[]) {
 
     printf("Username:\n");
     fgets(input, sizeof(input), stdin);
-    send_command(sock, "USER", input, response);
+    send_command(sock, "USER", input);
+    receive_data(sock, response);
     printf("Response is: %s\n", response);
 
     printf("Password:\n");
     fgets(input, sizeof(input), stdin);
-    send_command(sock, "PASS", input, response);
+    send_command(sock, "PASS", input);
+    receive_data(sock, response);
     printf("Response is: %s\n", response);
 
-    send_command(sock, "LIST", "", response);
+    printf("LIST your emails:\n");
+    send_command(sock, "LIST", "");
+    receive_data(sock, response);
     printf("Response is: %s\n", response);
 
     printf("Insert a command: RETR or DEL\n");
     fgets(input, sizeof(input), stdin);
 
     if (strncmp(input, "RETR", strlen("RETR")) == 0) {
-        send_command(sock, "RETR", input, response);
+        send_command(sock, "RETR", input);
+        receive_data(sock, response);
         printf("Response is: %s\n", response);
     }
 
     if (strncmp(input, "DELE", strlen("DEL")) == 0) {
-        send_command(sock, "DELE", input, response);
+        send_command(sock, "DELE", input);
+        receive_data(sock, response);
         printf("Response is: %s\n", response);
     }
 

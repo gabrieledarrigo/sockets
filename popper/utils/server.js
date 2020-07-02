@@ -22,9 +22,7 @@ server.on('connection', function (sock) {
     if (message.search(/LIST/ig) !== -1) {
       console.log("LIST command");
 
-      sock.write(`
-+OK
-1 215`);
+      sock.write(`+OK 1 215\n`);
     }
 
     if (message.search(/RETR/ig) !== -1) {
@@ -40,7 +38,7 @@ Content-Type: text/plain; charset=ISO-8859-1
 
 this is the email body
 
-.`);
+.\n`);
     }
 
     if (message.search(/DELE/ig) !== -1) {

@@ -18,14 +18,14 @@ int main(int argc, char *argv[]) {
     char message[BUFFER_SIZE];
 
     if (argc < 3) {
-        printf("Usage: %s server_name port\n", argv[0]);
+        printf("usage: %s [SERVER NAME] [SERVER PORT]\n", argv[0]);
         exit(1);
     }
 
     port_number = (int) strtol(argv[2], NULL, 10);
 
     if (errno != 0) {
-        perror("The provided port is not a valid number");
+        perror("The provided [SERVER PORT] is not a valid number");
     }
 
     printf("Connecting to server with name: %s, on port: %i\n", server_address, port_number);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     }
 
     sockaddr.sin_family = AF_INET;
-    sockaddr.sin_port = htons(41234);
+    sockaddr.sin_port = htons(port_number);
     bcopy(host->h_addr, &sockaddr.sin_addr, host->h_length);
 
     sock = socket(AF_INET, SOCK_DGRAM, 0);

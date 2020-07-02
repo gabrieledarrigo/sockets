@@ -14,9 +14,6 @@ int main(int argc, char *argv[]) {
     char buffer[200];
     char message[] = "Hello world";
 
-    sockaddr.sin_family = AF_INET;
-    sockaddr.sin_port = htons(port);
-
     host = gethostbyname(server_addr);
 
     if (host == NULL) {
@@ -24,6 +21,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    sockaddr.sin_family = AF_INET;
+    sockaddr.sin_port = htons(port);
     bcopy(host->h_addr, &sockaddr.sin_addr, host->h_length);
     sock = socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -37,7 +36,7 @@ int main(int argc, char *argv[]) {
     int received = recvfrom(sock, buffer, sizeof(buffer), 0, (struct sockaddr *) &sockaddr, (socklen_t *) sizeof(sockaddr));
 
     if (received == 0) {
-        perror("No message was receied from the server");
+        perror("No message was received from the server");
         exit(1);
     }
 
