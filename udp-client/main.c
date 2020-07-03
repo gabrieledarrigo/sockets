@@ -29,9 +29,8 @@ int main(int argc, char *argv[]) {
     }
 
     printf("Connecting to server with name: %s, on port: %i\n", server_address, port_number);
-    host = gethostbyname(server_address);
 
-    if (host == NULL) {
+    if (gethostbyname(server_address) == -1) {
         perror("Cannot resolve address for the provided hostname");
         exit(1);
     }
@@ -40,9 +39,7 @@ int main(int argc, char *argv[]) {
     sockaddr.sin_port = htons(port_number);
     bcopy(host->h_addr, &sockaddr.sin_addr, host->h_length);
 
-    sock = socket(AF_INET, SOCK_DGRAM, 0);
-
-    if (sock == -1) {
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         perror("Error during socket creation");
     }
 

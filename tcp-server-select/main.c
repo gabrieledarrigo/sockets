@@ -14,6 +14,7 @@ int main() {
     fd_set read_fds;
     int sockfd;
     int newfd;
+    int maxfd;
     int reuse = 1;
     char buffer[BUFFER_SIZE] = {0};
 
@@ -47,16 +48,18 @@ int main() {
     FD_ZERO(&read_fds);
     FD_SET(sockfd, &active_fds);
 
+    maxfd = sockfd;
+
     while (1) {
         read_fds = active_fds;
 
-        if (select(FD_SETSIZE, &read_fds, NULL, NULL, NULL) == -1) {
+        if (select(maxfd + 1, &read_fds, NULL, NULL, NULL) == -1) {
             perror("Error during select operation");
             exit(1);
         }
 
         // Iterate all over the sockets
-        for (int i = 0; i < FD_SETSIZE; i++) {
+        for (int i = 0; i <= maxfd; i++) {
             if (FD_ISSET(i, &read_fds)) {
                 // Handle new connection
                 if (i == sockfd) {
@@ -68,6 +71,7 @@ int main() {
 
                     printf("Accepting a new connection %i\n", newfd);
                     FD_SET (newfd, &active_fds);
+                    maxfd = newfd;
                 } else {
                     int n;
                     // Handle data from a client
