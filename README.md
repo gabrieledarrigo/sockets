@@ -13,7 +13,7 @@ They are probably simple and trivial programs but, you know, it's worth sharing!
 - [popper](./popper): A simple dummy TCP POP3 client 📫 📧.
 - [utils](./utils): A fast up-and-running Node.JS UDP server that listens on 127.0.0.1.41234 and send back a message.
 
-### References
+### References 🔖📚
 
 Here's some material that I used to study and learn:
 
@@ -21,3 +21,5 @@ Here's some material that I used to study and learn:
 - A classic C book: [C Programming: A Modern Approach - K. N. King](http://knking.com/books/c2/index.html)
 - Linux man pages, useful for a better description of network system calls: [https://linux.die.net/](https://linux.die.net/)
 - A useful book on network programming [Hands-On Network Programming with C](https://www.packtpub.com/networking-and-servers/hands-network-programming-c)
+- The great [Beej's Guide to Network Programming](http://beej.us/guide/bgnet/)
+
