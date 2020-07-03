@@ -11,6 +11,7 @@
 int main(int argc, char * argv[]) {
     struct sockaddr_in sockaddr;
     int sock;
+    int reuse = 1;
     char message[BUFFER_SIZE];
 
     bzero(&sockaddr, sizeof(sockaddr));
@@ -19,6 +20,7 @@ int main(int argc, char * argv[]) {
     sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(int));
 
     if (sock == -1) {
         perror("Error during socket creation");
@@ -42,6 +44,8 @@ int main(int argc, char * argv[]) {
         socklen_t client_addr_len = sizeof(client_addr);
         conn = accept(sock, (struct sockaddr *) &client_addr,  &client_addr_len);
 
+        printf("Connection received, %i\n", conn);
+
         if (conn <0) {
             perror("Server accept failed");
             exit(1);
@@ -55,7 +59,4 @@ int main(int argc, char * argv[]) {
         printf("Received message %s\n", message);
         close(conn);
     }
-
-    close(sock);
-    return 0;
 }
