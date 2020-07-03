@@ -6,6 +6,8 @@
 #include <unistd.h>
 
 #define SERVER_PORT 8080
+#define BUFFER_SIZE 1024
+#define INPUT_SIZE 128
 
 void send_command(int sock, char *command, char *args) {
     char buffer[256] = {0};
@@ -13,7 +15,7 @@ void send_command(int sock, char *command, char *args) {
     snprintf(buffer, sizeof(buffer), "%s %s", command, args);
 
     if (send(sock, buffer, sizeof(buffer), 0) == -1) {
-        perror("Error during send message");
+        perror("Command cannot be sent");
     }
 }
 
@@ -21,7 +23,8 @@ int receive_data(int socket_fd, char *buffer) {
     ssize_t data_read,
     total = 0;
 
-    while ((data_read = recv(socket_fd, buffer, 1024, 0)) > 0) {
+    // Wait until all data is received or the last char is a newline
+    while ((data_read = recv(socket_fd, buffer, BUFFER_SIZE, 0)) > 0) {
         if (data_read == 0 || buffer[data_read - 1] == '\n') {
             break;
         }
@@ -34,14 +37,15 @@ int receive_data(int socket_fd, char *buffer) {
         total += data_read;
     }
 
+    // Add the null terminator to the last position
     buffer[data_read] = '\0';
 
     return data_read;
 }
 
 int main(int argc, char *argv[]) {
-    char input[128] = {0};
-    char response[1024] = {0};
+    char input[INPUT_SIZE] = {0};
+    char response[BUFFER_SIZE] = {0};
     int sock;
     struct sockaddr_in sockaddr;
 
@@ -66,6 +70,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    // Start the communication with the server
     printf("Username:\n");
     fgets(input, sizeof(input), stdin);
     send_command(sock, "USER", input);

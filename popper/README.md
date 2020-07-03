@@ -1,4 +1,4 @@
-## POP3 📫 📧
+## Popper 📫 📧
 
 Si vuole implementare un client di posta basato sui socket che supporti il protocollo POP3.  
 Il client si collega al server POP3 che usa socket TCP, e spedisce al server tutti i comandi necessari per la visualizzazione dei messaggi
